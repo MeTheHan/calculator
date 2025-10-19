@@ -1,0 +1,2113 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NovaCalc Pro | Modern Calculator</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #6c63ff;
+            --primary-dark: #554fd8;
+            --secondary: #ff6584;
+            --dark: #2a2a3c;
+            --darker: #1e1e2c;
+            --light: #f5f5f7;
+            --gray: #8a8aa0;
+            --success: #4ade80;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --radius: 16px;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        .light-theme {
+            --primary: #6c63ff;
+            --primary-dark: #554fd8;
+            --secondary: #ff6584;
+            --dark: #f5f5f7;
+            --darker: #e0e0e5;
+            --light: #2a2a3c;
+            --gray: #5a5a6e;
+            --success: #16a34a;
+            --warning: #d97706;
+            --error: #dc2626;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--darker), var(--dark));
+            color: var(--light);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            overflow-x: hidden;
+            transition: var(--transition);
+        }
+
+        .container {
+            width: 100%;
+            max-width: 450px;
+            margin: 0 auto;
+            transition: var(--transition);
+        }
+
+        .blurred {
+            filter: blur(5px);
+            pointer-events: none;
+            user-select: none;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            animation: fadeIn 1s ease-out;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .logo i {
+            font-size: 2.5rem;
+            color: var(--primary);
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 5px;
+        }
+
+        .tagline {
+            color: var(--gray);
+            font-size: 1rem;
+            font-weight: 300;
+        }
+
+        .calculator {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: var(--radius);
+            padding: 25px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            animation: slideUp 0.8s ease-out;
+            transition: var(--transition);
+        }
+
+        .light-theme .calculator {
+            background: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .display {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: var(--radius);
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: right;
+            min-height: 120px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            overflow: hidden;
+            transition: var(--transition);
+        }
+
+        .light-theme .display {
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        .previous-operation {
+            font-size: 1rem;
+            color: var(--gray);
+            min-height: 24px;
+            word-break: break-all;
+        }
+
+        .current-operation {
+            font-size: 2.2rem;
+            font-weight: 600;
+            word-break: break-all;
+        }
+
+        .buttons-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+        }
+
+        .btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: var(--radius);
+            color: var(--light);
+            font-size: 1.3rem;
+            font-weight: 500;
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+            user-select: none;
+        }
+
+        .light-theme .btn {
+            background: rgba(0, 0, 0, 0.05);
+            color: var(--light);
+        }
+
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-3px);
+        }
+
+        .light-theme .btn:hover {
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        .btn:active {
+            transform: translateY(1px);
+        }
+
+        .btn-operation {
+            background: rgba(108, 99, 255, 0.2);
+            color: var(--primary);
+        }
+
+        .btn-operation:hover {
+            background: rgba(108, 99, 255, 0.3);
+        }
+
+        .btn-equals {
+            background: var(--primary);
+            color: white;
+            grid-column: span 2;
+        }
+
+        .btn-equals:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-clear, .btn-delete {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--error);
+        }
+
+        .btn-clear:hover, .btn-delete:hover {
+            background: rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-scientific {
+            background: rgba(245, 158, 11, 0.2);
+            color: var(--warning);
+        }
+
+        .btn-scientific:hover {
+            background: rgba(245, 158, 11, 0.3);
+        }
+
+        .history-panel {
+            margin-top: 25px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: var(--radius);
+            padding: 20px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            max-height: 200px;
+            overflow-y: auto;
+            animation: fadeIn 1s ease-out 0.5s both;
+            transition: var(--transition);
+        }
+
+        .light-theme .history-panel {
+            background: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .history-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .clear-history {
+            background: none;
+            border: none;
+            color: var(--gray);
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: var(--transition);
+        }
+
+        .clear-history:hover {
+            color: var(--error);
+        }
+
+        .history-item {
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 0.9rem;
+            display: flex;
+            justify-content: space-between;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .light-theme .history-item {
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .history-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            padding-left: 10px;
+            padding-right: 10px;
+            margin-left: -10px;
+            margin-right: -10px;
+            border-radius: 8px;
+        }
+
+        .light-theme .history-item:hover {
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        .history-expression {
+            color: var(--gray);
+        }
+
+        .history-result {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        footer {
+            margin-top: 30px;
+            text-align: center;
+            color: var(--gray);
+            font-size: 0.9rem;
+            animation: fadeIn 1s ease-out 1s both;
+        }
+
+        .features {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+
+        .feature {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.8rem;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 5px 10px;
+            border-radius: 20px;
+            transition: var(--transition);
+        }
+
+        .light-theme .feature {
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from { 
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to { 
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes scaleIn {
+            from { 
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            to { 
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        @keyframes slideDown {
+            from { 
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to { 
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Scientific mode */
+        .scientific-buttons {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease;
+        }
+
+        .scientific-buttons.active {
+            max-height: 500px;
+        }
+
+        .btn-sci {
+            background: rgba(255, 255, 255, 0.05);
+            font-size: 1rem;
+            height: 50px;
+        }
+
+        .light-theme .btn-sci {
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .container {
+                max-width: 100%;
+            }
+            
+            .calculator {
+                padding: 20px;
+            }
+            
+            .btn {
+                height: 60px;
+                font-size: 1.1rem;
+            }
+            
+            .current-operation {
+                font-size: 1.8rem;
+            }
+            
+            .scientific-buttons {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        /* Theme toggle */
+        .theme-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--light);
+            cursor: pointer;
+            transition: var(--transition);
+            z-index: 10;
+        }
+
+        .light-theme .theme-toggle {
+            background: rgba(0, 0, 0, 0.1);
+            color: var(--light);
+        }
+
+        .theme-toggle:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: rotate(30deg);
+        }
+
+        .light-theme .theme-toggle:hover {
+            background: rgba(0, 0, 0, 0.15);
+        }
+
+        /* Settings button */
+        .settings-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--light);
+            cursor: pointer;
+            transition: var(--transition);
+            z-index: 10;
+        }
+
+        .light-theme .settings-button {
+            background: rgba(0, 0, 0, 0.1);
+            color: var(--light);
+        }
+
+        .settings-button:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: rotate(30deg);
+        }
+
+        .light-theme .settings-button:hover {
+            background: rgba(0, 0, 0, 0.15);
+        }
+
+        /* Toast notification */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--primary);
+            color: white;
+            padding: 12px 24px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* Memory functions */
+        .memory-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            justify-content: center;
+        }
+
+        .btn-memory {
+            background: rgba(74, 222, 128, 0.2);
+            color: var(--success);
+            font-size: 0.9rem;
+            height: 40px;
+            flex: 1;
+        }
+
+        .btn-memory:hover {
+            background: rgba(74, 222, 128, 0.3);
+        }
+
+        /* Settings panel */
+        .settings-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            backdrop-filter: blur(5px);
+        }
+
+        .settings-overlay.active {
+            display: flex;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .settings-panel {
+            background: var(--darker);
+            border-radius: var(--radius);
+            padding: 25px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            width: 90%;
+            max-width: 400px;
+            max-height: 80vh;
+            overflow-y: auto;
+            animation: scaleIn 0.3s ease;
+            transition: var(--transition);
+        }
+
+        .light-theme .settings-panel {
+            background: var(--dark);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .settings-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .settings-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .close-settings {
+            background: none;
+            border: none;
+            color: var(--gray);
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .close-settings:hover {
+            color: var(--error);
+        }
+
+        .settings-options {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .settings-option {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 1rem;
+        }
+
+        .settings-option select {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 8px 12px;
+            color: var(--light);
+            width: 150px;
+        }
+
+        .light-theme .settings-option select {
+            background: rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(0, 0, 0, 0.2);
+            color: var(--light);
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--gray);
+            transition: .4s;
+            border-radius: 24px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--primary);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
+        /* Expression display */
+        .expression-display {
+            font-size: 0.9rem;
+            color: var(--gray);
+            margin-bottom: 5px;
+            min-height: 20px;
+        }
+
+        /* Save button */
+        .save-button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: var(--radius);
+            padding: 12px 20px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-top: 20px;
+            width: 100%;
+        }
+
+        .save-button:hover {
+            background: var(--primary-dark);
+        }
+
+        /* Vibration effect */
+        @keyframes vibrate {
+            0% { transform: translate(0); }
+            20% { transform: translate(-2px, 2px); }
+            40% { transform: translate(-2px, -2px); }
+            60% { transform: translate(2px, 2px); }
+            80% { transform: translate(2px, -2px); }
+            100% { transform: translate(0); }
+        }
+
+        .vibrate {
+            animation: vibrate 0.3s linear;
+        }
+
+        /* Language selector */
+        .language-selector {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .language-option {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .light-theme .language-option {
+            background: rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(0, 0, 0, 0.2);
+        }
+
+        .language-option.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        /* Legal info modal */
+        .legal-info-button {
+            background: none;
+            border: none;
+            color: var(--gray);
+            font-size: 0.7rem;
+            cursor: pointer;
+            margin-top: 15px;
+            padding: 5px 10px;
+            border-radius: 12px;
+            transition: var(--transition);
+            opacity: 0.7;
+        }
+
+        .legal-info-button:hover {
+            opacity: 1;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .legal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 200;
+            backdrop-filter: blur(10px);
+        }
+
+        .legal-overlay.active {
+            display: flex;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .legal-modal {
+            background: var(--darker);
+            border-radius: var(--radius);
+            padding: 30px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            width: 90%;
+            max-width: 700px;
+            max-height: 80vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            animation: scaleIn 0.3s ease;
+        }
+
+        .light-theme .legal-modal {
+            background: var(--dark);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .legal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .legal-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .close-legal {
+            background: none;
+            border: none;
+            color: var(--gray);
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .close-legal:hover {
+            color: var(--error);
+        }
+
+        .legal-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .legal-tab {
+            background: rgba(255, 255, 255, 0.05);
+            border: none;
+            border-radius: 20px;
+            padding: 8px 16px;
+            color: var(--light);
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 0.9rem;
+        }
+
+        .legal-tab.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .legal-tab:hover:not(.active) {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .legal-content {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        .legal-section {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .legal-section.active {
+            display: block;
+        }
+
+        .legal-section h3 {
+            margin-bottom: 15px;
+            color: var(--primary);
+            font-size: 1.2rem;
+        }
+
+        .legal-section p {
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+
+        .legal-section ul {
+            margin-left: 20px;
+            margin-bottom: 15px;
+        }
+
+        .legal-section li {
+            margin-bottom: 8px;
+            line-height: 1.5;
+        }
+
+        /* Scrollbar styling */
+        .legal-content::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .legal-content::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 3px;
+        }
+
+        .legal-content::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 3px;
+        }
+
+        .legal-content::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-dark);
+        }
+    </style>
+</head>
+<body>
+    <button class="settings-button" id="settingsButton">
+        <i class="fas fa-cog"></i>
+    </button>
+
+    <button class="theme-toggle" id="themeToggle">
+        <i class="fas fa-moon"></i>
+    </button>
+
+    <div class="container" id="mainContainer">
+        <header>
+            <div class="logo">
+                <i class="fas fa-calculator"></i>
+            </div>
+            <h1 id="appTitle">NovaCalc Pro</h1>
+            <p class="tagline" id="appTagline">A new experience in mathematical operations</p>
+        </header>
+        
+        <main class="calculator">
+            <div class="memory-buttons">
+                <button class="btn btn-memory" data-memory="mc" id="memoryClear">MC</button>
+                <button class="btn btn-memory" data-memory="mr" id="memoryRecall">MR</button>
+                <button class="btn btn-memory" data-memory="m+" id="memoryAdd">M+</button>
+                <button class="btn btn-memory" data-memory="m-" id="memorySubtract">M-</button>
+                <button class="btn btn-memory" data-memory="ms" id="memoryStore">MS</button>
+            </div>
+            
+            <div class="display">
+                <div class="expression-display" id="expressionDisplay"></div>
+                <div class="previous-operation" id="previousOperation"></div>
+                <div class="current-operation" id="currentOperation">0</div>
+            </div>
+            
+            <div class="buttons-grid">
+                <button class="btn btn-clear" data-action="clear" id="clearButton">C</button>
+                <button class="btn btn-delete" data-action="delete" id="deleteButton">⌫</button>
+                <button class="btn btn-scientific" data-action="scientific" id="scientificButton">SCI</button>
+                <button class="btn btn-operation" data-operation="÷">÷</button>
+                
+                <button class="btn" data-number="7">7</button>
+                <button class="btn" data-number="8">8</button>
+                <button class="btn" data-number="9">9</button>
+                <button class="btn btn-operation" data-operation="×">×</button>
+                
+                <button class="btn" data-number="4">4</button>
+                <button class="btn" data-number="5">5</button>
+                <button class="btn" data-number="6">6</button>
+                <button class="btn btn-operation" data-operation="-">-</button>
+                
+                <button class="btn" data-number="1">1</button>
+                <button class="btn" data-number="2">2</button>
+                <button class="btn" data-number="3">3</button>
+                <button class="btn btn-operation" data-operation="+">+</button>
+                
+                <button class="btn" data-number="0">0</button>
+                <button class="btn" data-number="." id="decimalButton">.</button>
+                <button class="btn btn-equals" data-action="calculate" id="equalsButton">=</button>
+            </div>
+            
+            <div class="scientific-buttons" id="scientificButtons">
+                <button class="btn btn-sci" data-scientific="sin">sin</button>
+                <button class="btn btn-sci" data-scientific="cos">cos</button>
+                <button class="btn btn-sci" data-scientific="tan">tan</button>
+                <button class="btn btn-sci" data-scientific="log">log</button>
+                <button class="btn btn-sci" data-scientific="ln">ln</button>
+                
+                <button class="btn btn-sci" data-scientific="π">π</button>
+                <button class="btn btn-sci" data-scientific="e">e</button>
+                <button class="btn btn-sci" data-scientific="^">x^y</button>
+                <button class="btn btn-sci" data-scientific="√">√</button>
+                <button class="btn btn-sci" data-scientific="!">x!</button>
+                
+                <button class="btn btn-sci" data-scientific="(">(</button>
+                <button class="btn btn-sci" data-scientific=")">)</button>
+                <button class="btn btn-sci" data-scientific="%">%</button>
+                <button class="btn btn-sci" data-scientific="1/x">1/x</button>
+                <button class="btn btn-sci" data-scientific="abs">|x|</button>
+            </div>
+        </main>
+        
+        <div class="history-panel">
+            <div class="history-header">
+                <div class="history-title" id="historyTitle">Calculation History</div>
+                <button class="clear-history" id="clearHistory">Clear</button>
+            </div>
+            <div class="history-list" id="historyList">
+                <!-- History items will be added here dynamically -->
+            </div>
+        </div>
+        
+        <footer>
+            <p id="footerText">© 2025 NovaCalc Pro - Modern solution for all mathematical operations</p>
+            <div class="features">
+                <div class="feature"><i class="fas fa-bolt"></i> <span id="feature1">Fast Calculation</span></div>
+                <div class="feature"><i class="fas fa-mobile-alt"></i> <span id="feature2">Mobile Friendly</span></div>
+                <div class="feature"><i class="fas fa-history"></i> <span id="feature3">Operation History</span></div>
+                <div class="feature"><i class="fas fa-flask"></i> <span id="feature4">Scientific Functions</span></div>
+                <div class="feature"><i class="fas fa-palette"></i> <span id="feature5">Themes</span></div>
+            </div>
+            <button class="legal-info-button" id="legalInfoButton">
+                <i class="fas fa-scale-balanced"></i> Yasal Bilgiler
+            </button>
+        </footer>
+    </div>
+
+    <div class="settings-overlay" id="settingsOverlay">
+        <div class="settings-panel">
+            <div class="settings-header">
+                <div class="settings-title" id="settingsTitle">Settings</div>
+                <button class="close-settings" id="closeSettings">&times;</button>
+            </div>
+            <div class="settings-options">
+                <div class="settings-option">
+                    <span id="languageLabel">Language:</span>
+                    <div class="language-selector">
+                        <div class="language-option active" data-lang="en">English</div>
+                        <div class="language-option" data-lang="tr">Türkçe</div>
+                    </div>
+                </div>
+                <div class="settings-option">
+                    <span id="decimalLabel">Decimal places:</span>
+                    <select id="decimalPrecision">
+                        <option value="8">8 digits</option>
+                        <option value="4">4 digits</option>
+                        <option value="2">2 digits</option>
+                        <option value="0">Integer</option>
+                    </select>
+                </div>
+                <div class="settings-option">
+                    <span id="animationsLabel">Animations:</span>
+                    <label class="switch">
+                        <input type="checkbox" id="animationsToggle" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="settings-option">
+                    <span id="soundLabel">Sound:</span>
+                    <label class="switch">
+                        <input type="checkbox" id="soundToggle" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <button class="save-button" id="saveSettings">Save Settings</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Legal Information Modal -->
+    <div class="legal-overlay" id="legalOverlay">
+        <div class="legal-modal">
+            <div class="legal-header">
+                <div class="legal-title">NovaCalc Pro - Yasal Bilgiler</div>
+                <button class="close-legal" id="closeLegal">&times;</button>
+            </div>
+            <div class="legal-tabs">
+                <button class="legal-tab active" data-tab="overview">Genel Bakış</button>
+                <button class="legal-tab" data-tab="features">Özellikler</button>
+                <button class="legal-tab" data-tab="technical">Teknik Detaylar</button>
+                <button class="legal-tab" data-tab="copyright">Telif Hakkı</button>
+                <button class="legal-tab" data-tab="legal">Yasal Uyarılar</button>
+                <button class="legal-tab" data-tab="installation">Kurulum</button>
+                <button class="legal-tab" data-tab="usage">Kullanım</button>
+                <button class="legal-tab" data-tab="developer">Geliştirici</button>
+            </div>
+            <div class="legal-content">
+                <!-- Genel Bakış -->
+                <div class="legal-section active" id="overview">
+                    <h3>Genel Bakış</h3>
+                    <p>NovaCalc Pro, modern ve kullanıcı dostu arayüzüyle öne çıkan, web tabanlı gelişmiş bir hesap makinesi uygulamasıdır. Hem temel matematik işlemleri hem de bilimsel hesaplamalar için tasarlanmıştır.</p>
+                    <p>Uygulama, kullanıcı deneyimini ön planda tutarak geliştirilmiş olup, responsive tasarımı sayesinde tüm cihazlarda sorunsuz çalışmaktadır.</p>
+                </div>
+
+                <!-- Özellikler -->
+                <div class="legal-section" id="features">
+                    <h3>Özellikler</h3>
+                    <h4>Temel Özellikler</h4>
+                    <ul>
+                        <li><strong>Temel İşlemler</strong>: Toplama, çıkarma, çarpma, bölme</li>
+                        <li><strong>Bilimsel Fonksiyonlar</strong>: Trigonometri, logaritma, üstel fonksiyonlar</li>
+                        <li><strong>Hafıza İşlevleri</strong>: MC, MR, M+, M-, MS</li>
+                        <li><strong>İşlem Geçmişi</strong>: Son 10 işlemi kaydetme ve görüntüleme</li>
+                        <li><strong>Çok Dilli Destek</strong>: Türkçe ve İngilizce</li>
+                        <li><strong>Tema Seçenekleri</strong>: Açık/Koyu tema</li>
+                    </ul>
+                    <h4>Teknik Özellikler</h4>
+                    <ul>
+                        <li><strong>Responsive Tasarım</strong>: Mobil uyumlu</li>
+                        <li><strong>Klavye Desteği</strong>: Klavye kısayolları</li>
+                        <li><strong>Yerel Depolama</strong>: Ayarlar ve geçmiş tarayıcıda saklanır</li>
+                        <li><strong>Ses Efektleri</strong>: Buton tıklama sesleri</li>
+                        <li><strong>Animasyonlar</strong>: Yumuşak geçişler ve efektler</li>
+                    </ul>
+                </div>
+
+                <!-- Teknik Detaylar -->
+                <div class="legal-section" id="technical">
+                    <h3>Teknik Detaylar</h3>
+                    <h4>Teknoloji Stack</h4>
+                    <ul>
+                        <li><strong>Frontend</strong>: HTML5, CSS3, JavaScript (ES6+)</li>
+                        <li><strong>Stil</strong>: CSS Variables, Flexbox, Grid</li>
+                        <li><strong>İkonlar</strong>: Font Awesome 6.4.0</li>
+                        <li><strong>Depolama</strong>: LocalStorage API</li>
+                        <li><strong>Ses</strong>: Web Audio API</li>
+                    </ul>
+                    <h4>Tarayıcı Uyumluluğu</h4>
+                    <ul>
+                        <li>✅ Chrome 90+</li>
+                        <li>✅ Firefox 88+</li>
+                        <li>✅ Safari 14+</li>
+                        <li>✅ Edge 90+</li>
+                    </ul>
+                </div>
+
+                <!-- Telif Hakkı -->
+                <div class="legal-section" id="copyright">
+                    <h3>Telif Hakkı ve Lisans</h3>
+                    <h4>Lisans Bilgisi</h4>
+                    <p><strong>NovaCalc Pro - Modern Hesap Makinesi</strong><br>
+                    Copyright (c) 2025 Metehan Akın<br>
+                    E-posta: metehanakin019@gmail.com</p>
+                    <p>Bu yazılım özel lisans altında dağıtılmaktadır. Tüm hakları saklıdır.</p>
+                    
+                    <h4>Telif Hakkı Koruma</h4>
+                    <ul>
+                        <li><strong>Kaynak Kod Koruma</strong>: Bu projenin kaynak kodu ticari sır kapsamında korunmaktadır. İzinsiz kopyalama, dağıtma veya değiştirme yasaktır.</li>
+                        <li><strong>Tasarım Hakları</strong>: UI/UX tasarımı özgün olarak geliştirilmiştir. Renk şeması, animasyonlar ve kullanıcı deneyimi telif hakkıyla korunmaktadır.</li>
+                        <li><strong>İçerik Hakları</strong>: Tüm metin içeriği ve çeviriler özgündür. İkonlar Font Awesome lisansı altında kullanılmaktadır.</li>
+                    </ul>
+                </div>
+
+                <!-- Yasal Uyarılar -->
+                <div class="legal-section" id="legal">
+                    <h3>Yasal Uyarılar</h3>
+                    <h4>Sorumluluk Reddi</h4>
+                    <p><em>BU YAZILIM "OLDUĞU GİBİ" SUNULMUŞTUR. YAZARLAR VE TELİF HAKKI SAHİPLERİ, YAZILIMIN KULLANIMIYLA İLGİLİ HERHANGİ BİR GARANTİ VERMEMEKTEDİR. YAZILIMIN KULLANIMINDAN DOĞACAK HASARLARDAN SORUMLU DEĞİLDİRLER.</em></p>
+                    
+                    <h4>Gizlilik</h4>
+                    <ul>
+                        <li>Kullanıcı verileri yerel tarayıcı depolamasında saklanır</li>
+                        <li>Hiçbir kişisel veri sunucuya gönderilmez</li>
+                        <li>Üçüncü taraf izleme veya analiz kodu bulunmamaktadır</li>
+                    </ul>
+                    
+                    <h4>Veri Saklama</h4>
+                    <ul>
+                        <li><strong>Hesap makinesi geçmişi</strong>: Yerel depolama</li>
+                        <li><strong>Kullanıcı ayarları</strong>: Yerel depolama</li>
+                        <li><strong>Oturum bilgileri</strong>: Saklanmaz</li>
+                    </ul>
+                </div>
+
+                <!-- Kurulum -->
+                <div class="legal-section" id="installation">
+                    <h3>Kurulum</h3>
+                    <h4>Gereksinimler</h4>
+                    <ul>
+                        <li>Modern web tarayıcısı</li>
+                        <li>JavaScript etkinleştirilmiş olmalı</li>
+                        <li>LocalStorage desteği</li>
+                    </ul>
+                    
+                    <h4>Kurulum Adımları</h4>
+                    <ol>
+                        <li>index.html dosyasını web sunucusuna yükleyin</li>
+                        <li>CSS ve JS dosyalarının doğru yolunu kontrol edin</li>
+                        <li>Tarayıcıda açarak test edin</li>
+                    </ol>
+                    
+                    <h4>Hosting Önerileri</h4>
+                    <ul>
+                        <li>Netlify, Vercel, GitHub Pages</li>
+                        <li>Apache, Nginx web sunucuları</li>
+                        <li>Herhangi bir statik web hosting servisi</li>
+                    </ul>
+                </div>
+
+                <!-- Kullanım -->
+                <div class="legal-section" id="usage">
+                    <h3>Kullanım</h3>
+                    <h4>Temel Kullanım</h4>
+                    <ol>
+                        <li>Sayıları girmek için sayı butonlarını kullanın</li>
+                        <li>İşlemler için operatör butonlarını tıklayın</li>
+                        <li>Sonucu görmek için "=" butonuna basın</li>
+                    </ol>
+                    
+                    <h4>Klavye Kısayolları</h4>
+                    <ul>
+                        <li><strong>Sayılar</strong>: 0-9</li>
+                        <li><strong>Operatörler</strong>: +, -, *, /</li>
+                        <li><strong>Enter</strong>: Hesapla</li>
+                        <li><strong>Escape</strong>: Temizle</li>
+                        <li><strong>Backspace</strong>: Sil</li>
+                    </ul>
+                    
+                    <h4>Ayarlar</h4>
+                    <ul>
+                        <li>⚙️ Ayarlar butonundan dil ve tema değiştirilebilir</li>
+                        <li>🔇 Ses efektleri açılıp kapatılabilir</li>
+                        <li>🎭 Animasyonlar etkinleştirilebilir</li>
+                    </ul>
+                </div>
+
+                <!-- Geliştirici Bilgileri -->
+                <div class="legal-section" id="developer">
+                    <h3>Geliştirici Bilgileri</h3>
+                    <h4>Proje Yapısı</h4>
+                    <pre>
+novacalc-pro/
+├── index.html
+├── styles/
+│   └── main.css
+├── scripts/
+│   └── calculator.js
+└── assets/
+    └── icons/
+                    </pre>
+                    
+                    <h4>Kod Standartları</h4>
+                    <ul>
+                        <li>Temiz ve okunabilir kod</li>
+                        <li>ES6+ standartları</li>
+                        <li>Responsive tasarım prensipleri</li>
+                        <li>Erişilebilirlik standartları</li>
+                    </ul>
+                    
+                    <h4>İletişim</h4>
+                    <p><strong>Geliştirici</strong>: Metehan Akın<br>
+                    <strong>E-posta</strong>: metehanakin019@gmail.com<br>
+                    <strong>Tarih</strong>: Ekim 2025</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // Language texts
+        const translations = {
+            en: {
+                appTitle: "NovaCalc Pro",
+                appTagline: "A new experience in mathematical operations",
+                memoryClear: "MC",
+                memoryRecall: "MR",
+                memoryAdd: "M+",
+                memorySubtract: "M-",
+                memoryStore: "MS",
+                clearButton: "C",
+                deleteButton: "⌫",
+                scientificButton: "SCI",
+                equalsButton: "=",
+                decimalButton: ".",
+                historyTitle: "Calculation History",
+                clearHistory: "Clear",
+                noHistory: "No calculations yet",
+                settingsTitle: "Settings",
+                languageLabel: "Language:",
+                decimalLabel: "Decimal places:",
+                animationsLabel: "Animations:",
+                soundLabel: "Sound:",
+                saveSettings: "Save Settings",
+                footerText: "© 2025 NovaCalc Pro - Modern solution for all mathematical operations",
+                feature1: "Fast Calculation",
+                feature2: "Mobile Friendly",
+                feature3: "Operation History",
+                feature4: "Scientific Functions",
+                feature5: "Themes",
+                toastMemoryCleared: "Memory cleared",
+                toastMemoryRecalled: "Memory recalled",
+                toastMemoryAdded: "Added to memory",
+                toastMemorySubtracted: "Subtracted from memory",
+                toastMemoryStored: "Stored in memory",
+                toastHistoryCleared: "History cleared",
+                toastResultCopied: "Result copied to display",
+                toastDarkTheme: "Dark theme activated",
+                toastLightTheme: "Light theme activated",
+                toastSoundOn: "Sound enabled",
+                toastSoundOff: "Sound disabled",
+                toastAnimationsOn: "Animations enabled",
+                toastAnimationsOff: "Animations disabled",
+                toastSettingsSaved: "Settings saved",
+                errorDivisionByZero: "Division by zero error!",
+                errorLogarithm: "Positive number required for logarithm!",
+                errorNaturalLog: "Positive number required for natural logarithm!",
+                errorSquareRoot: "Cannot calculate square root of negative number!",
+                errorFactorial: "Positive integer required for factorial!",
+                errorReciprocal: "Cannot calculate reciprocal of zero!",
+                errorParentheses: "Parentheses feature in development"
+            },
+            tr: {
+                appTitle: "NovaCalc Pro",
+                appTagline: "Matematiksel işlemlerde yeni bir deneyim",
+                memoryClear: "MT",
+                memoryRecall: "MG",
+                memoryAdd: "M+",
+                memorySubtract: "M-",
+                memoryStore: "MH",
+                clearButton: "S",
+                deleteButton: "⌫",
+                scientificButton: "BİL",
+                equalsButton: "=",
+                decimalButton: ",",
+                historyTitle: "Hesaplama Geçmişi",
+                clearHistory: "Temizle",
+                noHistory: "Henüz işlem yapılmadı",
+                settingsTitle: "Ayarlar",
+                languageLabel: "Dil:",
+                decimalLabel: "Ondalık hassasiyet:",
+                animationsLabel: "Animasyonlar:",
+                soundLabel: "Ses:",
+                saveSettings: "Ayarları Kaydet",
+                footerText: "© 2025 NovaCalc Pro - Tüm matematiksel işlemler için modern çözüm",
+                feature1: "Hızlı Hesaplama",
+                feature2: "Mobil Uyumlu",
+                feature3: "İşlem Geçmişi",
+                feature4: "Bilimsel Fonksiyonlar",
+                feature5: "Temalar",
+                toastMemoryCleared: "Hafıza temizlendi",
+                toastMemoryRecalled: "Hafızadan alındı",
+                toastMemoryAdded: "Hafızaya eklendi",
+                toastMemorySubtracted: "Hafızadan çıkarıldı",
+                toastMemoryStored: "Hafızaya kaydedildi",
+                toastHistoryCleared: "Geçmiş temizlendi",
+                toastResultCopied: "Sonuç ekrana aktarıldı",
+                toastDarkTheme: "Koyu tema etkin",
+                toastLightTheme: "Açık tema etkin",
+                toastSoundOn: "Ses etkin",
+                toastSoundOff: "Ses devre dışı",
+                toastAnimationsOn: "Animasyonlar etkin",
+                toastAnimationsOff: "Animasyonlar devre dışı",
+                toastSettingsSaved: "Ayarlar kaydedildi",
+                errorDivisionByZero: "Sıfıra bölme hatası!",
+                errorLogarithm: "Logaritma için pozitif sayı gerekli!",
+                errorNaturalLog: "Doğal logaritma için pozitif sayı gerekli!",
+                errorSquareRoot: "Negatif sayının karekökü alınamaz!",
+                errorFactorial: "Faktoriyel için pozitif tam sayı gerekli!",
+                errorReciprocal: "Sıfırın tersi alınamaz!",
+                errorParentheses: "Parantez özelliği geliştirme aşamasında"
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Calculator state
+            const calculator = {
+                displayValue: '0',
+                previousValue: '',
+                operation: null,
+                waitingForNewValue: false,
+                memory: 0,
+                history: JSON.parse(localStorage.getItem('calculatorHistory')) || [],
+                soundEnabled: true,
+                decimalPrecision: 8,
+                animationsEnabled: true,
+                language: 'en'
+            };
+
+            // DOM Elements
+            const currentOperationElement = document.getElementById('currentOperation');
+            const previousOperationElement = document.getElementById('previousOperation');
+            const expressionDisplayElement = document.getElementById('expressionDisplay');
+            const historyList = document.getElementById('historyList');
+            const scientificButtons = document.getElementById('scientificButtons');
+            const clearHistoryBtn = document.getElementById('clearHistory');
+            const themeToggle = document.getElementById('themeToggle');
+            const settingsButton = document.getElementById('settingsButton');
+            const settingsOverlay = document.getElementById('settingsOverlay');
+            const closeSettingsBtn = document.getElementById('closeSettings');
+            const saveSettingsBtn = document.getElementById('saveSettings');
+            const decimalPrecisionSelect = document.getElementById('decimalPrecision');
+            const animationsToggle = document.getElementById('animationsToggle');
+            const soundToggle = document.getElementById('soundToggle');
+            const languageOptions = document.querySelectorAll('.language-option');
+            const mainContainer = document.getElementById('mainContainer');
+            const legalInfoButton = document.getElementById('legalInfoButton');
+            const legalOverlay = document.getElementById('legalOverlay');
+            const closeLegalBtn = document.getElementById('closeLegal');
+            const legalTabs = document.querySelectorAll('.legal-tab');
+            const legalSections = document.querySelectorAll('.legal-section');
+            const toast = document.getElementById('toast');
+            
+            // Initialize from localStorage
+            const savedTheme = localStorage.getItem('calculatorTheme');
+            const savedSound = localStorage.getItem('calculatorSound');
+            const savedPrecision = localStorage.getItem('calculatorPrecision');
+            const savedAnimations = localStorage.getItem('calculatorAnimations');
+            const savedLanguage = localStorage.getItem('calculatorLanguage');
+            
+            if (savedTheme === 'light') {
+                document.body.classList.add('light-theme');
+                themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+            }
+            
+            if (savedSound === 'false') {
+                calculator.soundEnabled = false;
+                soundToggle.checked = false;
+            }
+            
+            if (savedPrecision) {
+                calculator.decimalPrecision = parseInt(savedPrecision);
+                decimalPrecisionSelect.value = savedPrecision;
+            }
+            
+            if (savedAnimations === 'false') {
+                calculator.animationsEnabled = false;
+                animationsToggle.checked = false;
+            }
+            
+            if (savedLanguage) {
+                calculator.language = savedLanguage;
+                setActiveLanguage(savedLanguage);
+            }
+            
+            // Apply current language
+            applyLanguage(calculator.language);
+            
+            // Legal info modal functionality
+            legalInfoButton.addEventListener('click', () => {
+                legalOverlay.classList.add('active');
+                mainContainer.classList.add('blurred');
+            });
+            
+            closeLegalBtn.addEventListener('click', () => {
+                legalOverlay.classList.remove('active');
+                mainContainer.classList.remove('blurred');
+            });
+            
+            legalOverlay.addEventListener('click', (e) => {
+                if (e.target === legalOverlay) {
+                    legalOverlay.classList.remove('active');
+                    mainContainer.classList.remove('blurred');
+                }
+            });
+            
+            // Legal tabs functionality
+            legalTabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const tabId = tab.dataset.tab;
+                    
+                    // Remove active class from all tabs and sections
+                    legalTabs.forEach(t => t.classList.remove('active'));
+                    legalSections.forEach(s => s.classList.remove('active'));
+                    
+                    // Add active class to clicked tab and corresponding section
+                    tab.classList.add('active');
+                    document.getElementById(tabId).classList.add('active');
+                });
+            });
+            
+            // Update display
+            function updateDisplay() {
+                currentOperationElement.textContent = calculator.displayValue;
+                previousOperationElement.textContent = calculator.previousValue + (calculator.operation ? ' ' + calculator.operation : '');
+                
+                // Update expression display
+                if (calculator.previousValue && calculator.operation) {
+                    expressionDisplayElement.textContent = `${calculator.previousValue} ${calculator.operation}`;
+                } else {
+                    expressionDisplayElement.textContent = '';
+                }
+            }
+            
+            // Play sound
+            function playSound() {
+                if (!calculator.soundEnabled) return;
+                
+                // Create a simple beep sound using Web Audio API
+                try {
+                    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+                    
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+                    
+                    oscillator.frequency.value = 800;
+                    oscillator.type = 'sine';
+                    
+                    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+                    
+                    oscillator.start(audioContext.currentTime);
+                    oscillator.stop(audioContext.currentTime + 0.1);
+                } catch (e) {
+                    console.log("Web Audio API not supported");
+                }
+            }
+            
+            // Show toast notification
+            function showToast(message) {
+                toast.textContent = message;
+                toast.classList.add('show');
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                }, 3000);
+            }
+            
+            // Format number based on precision
+            function formatNumber(num) {
+                if (calculator.decimalPrecision === 0) {
+                    return Math.round(num).toString();
+                }
+                
+                return Number(num).toFixed(calculator.decimalPrecision);
+            }
+            
+            // Add to history
+            function addToHistory(expression, result) {
+                const historyItem = { 
+                    expression, 
+                    result, 
+                    timestamp: new Date().toLocaleString() 
+                };
+                calculator.history.unshift(historyItem);
+                
+                // Keep only last 10 items
+                if (calculator.history.length > 10) {
+                    calculator.history.pop();
+                }
+                
+                // Save to localStorage
+                localStorage.setItem('calculatorHistory', JSON.stringify(calculator.history));
+                
+                // Update history display
+                updateHistoryDisplay();
+            }
+            
+            // Update history display
+            function updateHistoryDisplay() {
+                historyList.innerHTML = '';
+                
+                if (calculator.history.length === 0) {
+                    const noHistoryText = translations[calculator.language].noHistory;
+                    historyList.innerHTML = `<div style="text-align: center; color: var(--gray); padding: 20px;">${noHistoryText}</div>`;
+                    return;
+                }
+                
+                calculator.history.forEach((item, index) => {
+                    const historyItemElement = document.createElement('div');
+                    historyItemElement.className = 'history-item';
+                    historyItemElement.innerHTML = `
+                        <div class="history-expression">${item.expression}</div>
+                        <div class="history-result">${item.result}</div>
+                    `;
+                    historyItemElement.addEventListener('click', () => {
+                        calculator.displayValue = item.result;
+                        updateDisplay();
+                        showToast(translations[calculator.language].toastResultCopied);
+                    });
+                    historyList.appendChild(historyItemElement);
+                });
+            }
+            
+            // Set active language in UI
+            function setActiveLanguage(lang) {
+                languageOptions.forEach(option => {
+                    if (option.dataset.lang === lang) {
+                        option.classList.add('active');
+                    } else {
+                        option.classList.remove('active');
+                    }
+                });
+            }
+            
+            // Apply language to UI
+            function applyLanguage(lang) {
+                const t = translations[lang];
+                
+                // Update all text elements
+                document.getElementById('appTitle').textContent = t.appTitle;
+                document.getElementById('appTagline').textContent = t.appTagline;
+                document.getElementById('memoryClear').textContent = t.memoryClear;
+                document.getElementById('memoryRecall').textContent = t.memoryRecall;
+                document.getElementById('memoryAdd').textContent = t.memoryAdd;
+                document.getElementById('memorySubtract').textContent = t.memorySubtract;
+                document.getElementById('memoryStore').textContent = t.memoryStore;
+                document.getElementById('clearButton').textContent = t.clearButton;
+                document.getElementById('deleteButton').textContent = t.deleteButton;
+                document.getElementById('scientificButton').textContent = t.scientificButton;
+                document.getElementById('equalsButton').textContent = t.equalsButton;
+                document.getElementById('decimalButton').textContent = t.decimalButton;
+                document.getElementById('historyTitle').textContent = t.historyTitle;
+                document.getElementById('clearHistory').textContent = t.clearHistory;
+                document.getElementById('settingsTitle').textContent = t.settingsTitle;
+                document.getElementById('languageLabel').textContent = t.languageLabel;
+                document.getElementById('decimalLabel').textContent = t.decimalLabel;
+                document.getElementById('animationsLabel').textContent = t.animationsLabel;
+                document.getElementById('soundLabel').textContent = t.soundLabel;
+                document.getElementById('saveSettings').textContent = t.saveSettings;
+                document.getElementById('footerText').textContent = t.footerText;
+                document.getElementById('feature1').textContent = t.feature1;
+                document.getElementById('feature2').textContent = t.feature2;
+                document.getElementById('feature3').textContent = t.feature3;
+                document.getElementById('feature4').textContent = t.feature4;
+                document.getElementById('feature5').textContent = t.feature5;
+                
+                // Update decimal precision options
+                const decimalOptions = decimalPrecisionSelect.options;
+                if (lang === 'tr') {
+                    decimalOptions[0].text = '8 basamak';
+                    decimalOptions[1].text = '4 basamak';
+                    decimalOptions[2].text = '2 basamak';
+                    decimalOptions[3].text = 'Tam sayı';
+                } else {
+                    decimalOptions[0].text = '8 digits';
+                    decimalOptions[1].text = '4 digits';
+                    decimalOptions[2].text = '2 digits';
+                    decimalOptions[3].text = 'Integer';
+                }
+                
+                // Update history display
+                updateHistoryDisplay();
+            }
+            
+            // Input digit
+            function inputDigit(digit) {
+                playSound();
+                
+                if (calculator.waitingForNewValue) {
+                    calculator.displayValue = digit;
+                    calculator.waitingForNewValue = false;
+                } else {
+                    calculator.displayValue = calculator.displayValue === '0' ? digit : calculator.displayValue + digit;
+                }
+            }
+            
+            // Input decimal
+            function inputDecimal() {
+                playSound();
+                
+                if (calculator.waitingForNewValue) {
+                    calculator.displayValue = '0.';
+                    calculator.waitingForNewValue = false;
+                    return;
+                }
+                
+                const decimalSeparator = calculator.language === 'tr' ? ',' : '.';
+                
+                if (!calculator.displayValue.includes(decimalSeparator)) {
+                    calculator.displayValue += decimalSeparator;
+                }
+            }
+            
+            // Handle operator
+            function handleOperator(nextOperator) {
+                playSound();
+                const inputValue = parseFloat(calculator.displayValue.replace(',', '.'));
+                
+                if (calculator.operation && !calculator.waitingForNewValue) {
+                    const result = performCalculation();
+                    calculator.displayValue = formatNumber(result);
+                    addToHistory(`${calculator.previousValue} ${calculator.operation} ${inputValue}`, result);
+                }
+                
+                calculator.previousValue = calculator.displayValue;
+                calculator.waitingForNewValue = true;
+                calculator.operation = nextOperator;
+            }
+            
+            // Perform calculation
+            function performCalculation() {
+                const prevValue = parseFloat(calculator.previousValue.replace(',', '.'));
+                const currentValue = parseFloat(calculator.displayValue.replace(',', '.'));
+                
+                if (isNaN(prevValue) || isNaN(currentValue)) return '';
+                
+                let computation;
+                switch (calculator.operation) {
+                    case '+':
+                        computation = prevValue + currentValue;
+                        break;
+                    case '-':
+                        computation = prevValue - currentValue;
+                        break;
+                    case '×':
+                        computation = prevValue * currentValue;
+                        break;
+                    case '÷':
+                        if (currentValue === 0) {
+                            showToast(translations[calculator.language].errorDivisionByZero);
+                            return 'Error';
+                        }
+                        computation = prevValue / currentValue;
+                        break;
+                    case '^':
+                        computation = Math.pow(prevValue, currentValue);
+                        break;
+                    default:
+                        return '';
+                }
+                
+                // Round to avoid floating point issues
+                computation = Math.round(computation * 100000000) / 100000000;
+                return computation;
+            }
+            
+            // Reset calculator
+            function resetCalculator() {
+                calculator.displayValue = '0';
+                calculator.previousValue = '';
+                calculator.operation = null;
+                calculator.waitingForNewValue = false;
+            }
+            
+            // Delete last character
+            function deleteLast() {
+                playSound();
+                
+                if (calculator.displayValue.length > 1) {
+                    calculator.displayValue = calculator.displayValue.slice(0, -1);
+                } else {
+                    calculator.displayValue = '0';
+                }
+            }
+            
+            // Handle scientific functions
+            function handleScientificFunction(func) {
+                playSound();
+                const currentValue = parseFloat(calculator.displayValue.replace(',', '.'));
+                let result;
+                
+                switch (func) {
+                    case 'sin':
+                        result = Math.sin(currentValue * Math.PI / 180); // Convert to radians
+                        break;
+                    case 'cos':
+                        result = Math.cos(currentValue * Math.PI / 180);
+                        break;
+                    case 'tan':
+                        result = Math.tan(currentValue * Math.PI / 180);
+                        break;
+                    case 'log':
+                        if (currentValue <= 0) {
+                            showToast(translations[calculator.language].errorLogarithm);
+                            return;
+                        }
+                        result = Math.log10(currentValue);
+                        break;
+                    case 'ln':
+                        if (currentValue <= 0) {
+                            showToast(translations[calculator.language].errorNaturalLog);
+                            return;
+                        }
+                        result = Math.log(currentValue);
+                        break;
+                    case 'π':
+                        result = Math.PI;
+                        break;
+                    case 'e':
+                        result = Math.E;
+                        break;
+                    case '√':
+                        if (currentValue < 0) {
+                            showToast(translations[calculator.language].errorSquareRoot);
+                            return;
+                        }
+                        result = Math.sqrt(currentValue);
+                        break;
+                    case '!':
+                        if (currentValue < 0 || !Number.isInteger(currentValue)) {
+                            showToast(translations[calculator.language].errorFactorial);
+                            return;
+                        }
+                        result = factorial(currentValue);
+                        break;
+                    case '1/x':
+                        if (currentValue === 0) {
+                            showToast(translations[calculator.language].errorReciprocal);
+                            return;
+                        }
+                        result = 1 / currentValue;
+                        break;
+                    case 'abs':
+                        result = Math.abs(currentValue);
+                        break;
+                    case '%':
+                        result = currentValue / 100;
+                        break;
+                    case '(':
+                    case ')':
+                        showToast(translations[calculator.language].errorParentheses);
+                        return;
+                    default:
+                        return;
+                }
+                
+                // Round to avoid floating point issues
+                if (result !== undefined) {
+                    result = Math.round(result * 100000000) / 100000000;
+                    calculator.displayValue = formatNumber(result);
+                    addToHistory(`${func}(${currentValue})`, result);
+                }
+            }
+            
+            // Calculate factorial
+            function factorial(n) {
+                if (n < 0) return NaN;
+                if (n === 0 || n === 1) return 1;
+                
+                let result = 1;
+                for (let i = 2; i <= n; i++) {
+                    result *= i;
+                }
+                return result;
+            }
+            
+            // Handle memory functions
+            function handleMemoryFunction(memAction) {
+                playSound();
+                const currentValue = parseFloat(calculator.displayValue.replace(',', '.'));
+                
+                switch (memAction) {
+                    case 'mc':
+                        calculator.memory = 0;
+                        showToast(translations[calculator.language].toastMemoryCleared);
+                        break;
+                    case 'mr':
+                        calculator.displayValue = formatNumber(calculator.memory);
+                        updateDisplay();
+                        showToast(translations[calculator.language].toastMemoryRecalled);
+                        break;
+                    case 'm+':
+                        calculator.memory += currentValue;
+                        showToast(translations[calculator.language].toastMemoryAdded);
+                        break;
+                    case 'm-':
+                        calculator.memory -= currentValue;
+                        showToast(translations[calculator.language].toastMemorySubtracted);
+                        break;
+                    case 'ms':
+                        calculator.memory = currentValue;
+                        showToast(translations[calculator.language].toastMemoryStored);
+                        break;
+                }
+            }
+            
+            // Toggle theme
+            function toggleTheme() {
+                document.body.classList.toggle('light-theme');
+                const isLight = document.body.classList.contains('light-theme');
+                
+                if (isLight) {
+                    themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+                    localStorage.setItem('calculatorTheme', 'light');
+                    showToast(translations[calculator.language].toastLightTheme);
+                } else {
+                    themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
+                    localStorage.setItem('calculatorTheme', 'dark');
+                    showToast(translations[calculator.language].toastDarkTheme);
+                }
+            }
+            
+            // Toggle sound
+            function toggleSound() {
+                calculator.soundEnabled = !calculator.soundEnabled;
+                
+                if (calculator.soundEnabled) {
+                    localStorage.setItem('calculatorSound', 'true');
+                    showToast(translations[calculator.language].toastSoundOn);
+                } else {
+                    localStorage.setItem('calculatorSound', 'false');
+                    showToast(translations[calculator.language].toastSoundOff);
+                }
+            }
+            
+            // Update decimal precision
+            function updateDecimalPrecision() {
+                calculator.decimalPrecision = parseInt(decimalPrecisionSelect.value);
+                localStorage.setItem('calculatorPrecision', calculator.decimalPrecision);
+                
+                // Reformat current display value
+                if (calculator.displayValue !== '0' && calculator.displayValue !== 'Error') {
+                    calculator.displayValue = formatNumber(parseFloat(calculator.displayValue.replace(',', '.')));
+                    updateDisplay();
+                }
+            }
+            
+            // Toggle animations
+            function toggleAnimations() {
+                calculator.animationsEnabled = animationsToggle.checked;
+                localStorage.setItem('calculatorAnimations', calculator.animationsEnabled);
+                
+                if (calculator.animationsEnabled) {
+                    showToast(translations[calculator.language].toastAnimationsOn);
+                } else {
+                    showToast(translations[calculator.language].toastAnimationsOff);
+                }
+            }
+            
+            // Add vibration effect to button
+            function addVibrationEffect(button) {
+                if (!calculator.animationsEnabled) return;
+                
+                button.classList.add('vibrate');
+                setTimeout(() => {
+                    button.classList.remove('vibrate');
+                }, 300);
+            }
+            
+            // Save settings
+            function saveSettings() {
+                // Language is already set by the language selector
+                localStorage.setItem('calculatorLanguage', calculator.language);
+                
+                updateDecimalPrecision();
+                toggleAnimations();
+                toggleSound();
+                
+                showToast(translations[calculator.language].toastSettingsSaved);
+                closeSettings();
+            }
+            
+            // Open settings
+            function openSettings() {
+                settingsOverlay.classList.add('active');
+                mainContainer.classList.add('blurred');
+            }
+            
+            // Close settings
+            function closeSettings() {
+                settingsOverlay.classList.remove('active');
+                mainContainer.classList.remove('blurred');
+            }
+            
+            // Event Listeners
+            document.querySelector('.buttons-grid').addEventListener('click', event => {
+                const { target } = event;
+                
+                if (!target.matches('button')) return;
+                
+                addVibrationEffect(target);
+                
+                if (target.dataset.number) {
+                    inputDigit(target.dataset.number);
+                    updateDisplay();
+                    return;
+                }
+                
+                if (target.dataset.operation) {
+                    handleOperator(target.dataset.operation);
+                    updateDisplay();
+                    return;
+                }
+                
+                if (target.dataset.action) {
+                    if (target.dataset.action === 'calculate') {
+                        const result = performCalculation();
+                        calculator.displayValue = formatNumber(result);
+                        calculator.previousValue = '';
+                        calculator.operation = null;
+                        calculator.waitingForNewValue = true;
+                        updateDisplay();
+                        return;
+                    }
+                    
+                    if (target.dataset.action === 'clear') {
+                        resetCalculator();
+                        updateDisplay();
+                        return;
+                    }
+                    
+                    if (target.dataset.action === 'delete') {
+                        deleteLast();
+                        updateDisplay();
+                        return;
+                    }
+                    
+                    if (target.dataset.action === 'scientific') {
+                        scientificButtons.classList.toggle('active');
+                        return;
+                    }
+                }
+            });
+            
+            // Scientific buttons
+            scientificButtons.addEventListener('click', event => {
+                const { target } = event;
+                
+                if (!target.matches('button')) return;
+                
+                addVibrationEffect(target);
+                
+                if (target.dataset.scientific) {
+                    handleScientificFunction(target.dataset.scientific);
+                    updateDisplay();
+                }
+            });
+            
+            // Memory buttons
+            document.querySelector('.memory-buttons').addEventListener('click', event => {
+                const { target } = event;
+                
+                if (!target.matches('button')) return;
+                
+                addVibrationEffect(target);
+                
+                if (target.dataset.memory) {
+                    handleMemoryFunction(target.dataset.memory);
+                }
+            });
+            
+            // Clear history
+            clearHistoryBtn.addEventListener('click', () => {
+                calculator.history = [];
+                localStorage.setItem('calculatorHistory', JSON.stringify(calculator.history));
+                updateHistoryDisplay();
+                showToast(translations[calculator.language].toastHistoryCleared);
+            });
+            
+            // Theme toggle
+            themeToggle.addEventListener('click', toggleTheme);
+            
+            // Settings button
+            settingsButton.addEventListener('click', openSettings);
+            
+            // Close settings
+            closeSettingsBtn.addEventListener('click', closeSettings);
+            
+            // Close settings when clicking outside
+            settingsOverlay.addEventListener('click', (e) => {
+                if (e.target === settingsOverlay) {
+                    closeSettings();
+                }
+            });
+            
+            // Language selection
+            languageOptions.forEach(option => {
+                option.addEventListener('click', () => {
+                    const selectedLang = option.dataset.lang;
+                    calculator.language = selectedLang;
+                    setActiveLanguage(selectedLang);
+                    applyLanguage(selectedLang);
+                });
+            });
+            
+            // Save settings
+            saveSettingsBtn.addEventListener('click', saveSettings);
+            
+            // Decimal precision
+            decimalPrecisionSelect.addEventListener('change', updateDecimalPrecision);
+            
+            // Animations toggle
+            animationsToggle.addEventListener('change', toggleAnimations);
+            
+            // Sound toggle
+            soundToggle.addEventListener('change', toggleSound);
+            
+            // Keyboard support
+            document.addEventListener('keydown', event => {
+                const { key } = event;
+                
+                if ((key >= '0' && key <= '9')) {
+                    event.preventDefault();
+                    inputDigit(key);
+                    updateDisplay();
+                }
+                
+                if (key === '.' || (calculator.language === 'tr' && key === ',')) {
+                    event.preventDefault();
+                    inputDecimal();
+                    updateDisplay();
+                }
+                
+                if (key === '+' || key === '-' || key === '*' || key === '/') {
+                    event.preventDefault();
+                    const operationMap = {
+                        '+': '+',
+                        '-': '-',
+                        '*': '×',
+                        '/': '÷'
+                    };
+                    handleOperator(operationMap[key]);
+                    updateDisplay();
+                }
+                
+                if (key === 'Enter' || key === '=') {
+                    event.preventDefault();
+                    const result = performCalculation();
+                    calculator.displayValue = formatNumber(result);
+                    calculator.previousValue = '';
+                    calculator.operation = null;
+                    calculator.waitingForNewValue = true;
+                    updateDisplay();
+                }
+                
+                if (key === 'Escape' || key === 'Delete') {
+                    event.preventDefault();
+                    resetCalculator();
+                    updateDisplay();
+                }
+                
+                if (key === 'Backspace') {
+                    event.preventDefault();
+                    deleteLast();
+                    updateDisplay();
+                }
+            });
+            
+            // Initialize
+            updateDisplay();
+            updateHistoryDisplay();
+        });
+    </script>
+</body>
+</html>
